@@ -1,0 +1,330 @@
+American:
+Tulane
+North Texas
+Navy
+East Carolina
+South Florida
+Army
+Memphis
+Texas-San Antonio
+Temple
+Florida Atlantic
+Rice
+Ala-Birmingham
+Tulsa
+Charlotte
+
+
+ACC:
+Virginia
+SMU
+Miami (FL)
+Pittsburgh
+Georgia Tech
+Duke
+North Carolina St.
+California
+Clemson
+Louisville
+Wake Forest
+Stanford
+Florida St.
+North Carolina
+Virginia Tech
+Boston Col.
+Syracuse
+
+
+
+Big-12:
+Texas Tech
+BYU
+Utah
+Houston
+Arizona
+Arizona St.
+Iowa St.
+Kansas St.
+TCU
+Cincinnati
+Baylor
+Kansas
+Central Florida
+West Virginia
+Colorado
+Oklahoma St.
+
+
+
+
+Big-10:
+Indiana
+Ohio St.
+Oregon
+USC
+Michigan
+Iowa
+Washington
+Illinois
+Minnesota
+Nebraska
+Northwestern
+UCLA
+Penn St.
+Rutgers
+Wisconsin
+Michigan St.
+Maryland
+Purdue
+
+
+
+
+CUSA:
+Jacksonville St.
+Western Kentucky
+Louisiana Tech
+Missouri State
+Florida International
+Delaware
+Liberty
+Middle Tenn. St.
+New Mexico St.
+Texas-El Paso
+Sam Houston St.
+
+
+
+FBS-IND:
+Notre Dame
+Connecticut
+
+
+
+Mid-Amer:
+Western Michigan
+Ohio
+Toledo
+Miami (OH)
+Central Michigan
+Akron
+Buffalo
+Kent St.
+Eastern Michigan
+Ball St.
+Bowling Green
+Northern Illinois
+Massachusetts
+
+
+
+MWAC:
+Boise St.
+New Mexico
+San Diego St.
+UNLV
+Fresno St.
+Hawaii
+Utah St.
+Air Force
+Nevada
+Wyoming
+San Jose St.
+Colorado St.
+
+
+
+
+Pac-12:
+Washington St.
+Oregon St.
+
+
+
+SEC:
+Mississippi
+Mississippi St.
+Georgia
+Texas A&M
+Alabama
+Texas
+Oklahoma
+Vanderbilt
+Missouri
+Tennessee
+LSU
+Kentucky
+Florida
+Auburn
+South Carolina
+Arkansas
+
+
+
+Sun-Belt:
+James Madison
+Old Dominion
+Coastal Carolina
+Georgia Southern
+Marshall
+Appalachian St.
+Georgia St.
+Troy
+Southern Miss
+Louisiana
+Arkansas St.
+Texas St.
+South Alabama
+La-Monroe
+
+
+
+FCS:
+Abilene Christian
+Alabama St.
+Ark-Pine Bluff
+Bethune-Cookman
+Brown
+Cal Poly-San Luis Obispo
+Central Arkansas
+Central Connecticut St.
+Chattanooga
+Cornell
+Dayton
+Drake
+Eastern Illinois
+Eastern Kentucky
+Eastern Washington
+Elon
+Florida A&M
+Fordham
+Furman
+Grambling St.
+Hampton
+Harvard
+Howard
+Idaho
+Idaho St.
+Illinois St.
+Jackson St.
+Lehigh
+Lindenwood
+Maine
+McNeese St.
+Montana
+Montana St.
+Morgan St.
+New Hampshire
+Nicholls St.
+Norfolk St.
+North Alabama
+North Carolina A&T
+North Carolina Central
+North Dakota
+North Dakota St.
+Northern Arizona
+Northern Colorado
+Northern Iowa
+Northwestern St. (LA)
+Portland St.
+Presbyterian
+Princeton
+Rhode Island
+Richmond
+S.F. Austin
+Sacramento St.
+Samford
+San Diego
+South Carolina St.
+South Dakota
+South Dakota St.
+Southeastern Louisiana
+Southern
+Southern Illinois
+Southern Utah
+Tennessee St.
+Tennessee Tech
+The Citadel
+Towson
+UC Davis
+UT Martin
+Villanova
+Wagner
+Weber St.
+West Georgia
+Western Illinois
+William & Mary
+Youngstown St.
+
+
+OTHER:
+Ashland
+Bloomsburg
+Central Missouri St.
+Chadron St.
+Charleston (WV)
+Clarion
+Concordia-St.Paul (MN)
+East Central (OK)
+Fayetteville St.
+Fort Hays St.
+Grand Valley St.
+Harding
+Hillsdale
+Hobart
+Hofstra
+Humboldt St.
+Indiana (PA)
+Kentucky St.
+Kutztown (PA)
+Lane
+Lenoir-Rhyne
+Long Beach CC
+Mars Hill
+Michigan Tech
+Midwestern St.
+Missouri Southern
+Missouri Western St.
+Mount Union
+NW Missouri St.
+Nebraska-Omaha
+Newberry
+Pittsburg St.
+Saginaw Valley St.
+Saint John's (MN)
+Sioux Falls
+Slippery Rock
+Texas A&M-Commerce
+Texas A&M-Kingsville
+Tusculum
+Tuskegee
+Valdosta St.
+Washburn
+West Texas A&M
+Western Oregon
+Wisconsin–Whitewater
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
