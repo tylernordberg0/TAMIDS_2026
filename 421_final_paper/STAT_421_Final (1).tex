@@ -1,0 +1,342 @@
+% ============================================================
+%  STAT 421 Final Paper - NFL Draft Value Model
+%  5-page, 2-column format
+% ============================================================
+
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{authblk}
+\usepackage{caption}
+\captionsetup{font=small}
+
+
+\title{\textbf{Predicting NFL Draft Success and Identifying Undervalued Offensive Prospects}}
+
+\author{Josh Lee, Nick Standley, Alex Dessler, Tyler Nordberg, Collin Weinmann}
+\affil{STAT 421 Final Paper \\ Texas A\&M University}
+
+\date{April 29, 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+% ============================================================
+%  1. INTRODUCTION
+% ============================================================
+
+\section{Introduction}
+
+NFL teams consistently face inefficiencies in the draft, often overvaluing certain prospects while overlooking others. Even with extensive scouting, there is still a large gap between where players are selected and how they actually perform in the league. This problem is especially important at high-impact offensive positions—quarterback (QB), wide receiver (WR), and running back (RB)—where individual performance can directly shape game outcomes. These positions also carry some of the largest financial investments in the NFL, which raises the stakes of getting draft decisions right. This project looks at whether publicly available NFL Combine data and college performance statistics can be used to better predict player success and, more importantly, identify undervalued draft prospects. While teams already use a mix of film, interviews, and metrics, much of the process is still subjective. Prior work has shown that this subjectivity leads to inconsistent outcomes and a high rate of unsuccessful early draft picks . More recent research has started to apply machine learning to this problem, showing that data-driven models can improve consistency and uncover patterns that are difficult to detect through traditional scouting alone . However, many of these approaches focus on predicting success or draft position separately, rather than connecting the two. To address this, we take a more direct approach. 
+
+\subsection{Contribution}
+Our contribution is a position-specific filtering framework that combines predicted NFL success with expected draft position to flag players whose measurable profile appears stronger than their draft cost. For each position, we build two models: (1) a classification model that estimates the probability of NFL success, and (2) a regression model that predicts expected draft position. The difference between these two outputs serves as a signal of inefficiency. If a player is predicted to succeed but is expected to be drafted later, that gap represents a potential undervalued opportunity. The goal is not to replace scouting, but to support it. By combining performance prediction with draft position, this framework helps highlight players whose projected value exceeds their cost. In that sense, it acts as a “Moneyball”-style filter, giving teams a more objective way to identify high-value prospects while reducing some of the risk built into the draft process.
+
+% ============================================================
+%  2. RELATED WORKS
+% ============================================================
+
+\section{Related Works}
+
+Prior research has explored how well pre-draft data can predict NFL performance, particularly focusing on the role of combine metrics. The study \textit{``The NFL Combine: Does It Predict Performance in the National Football League?''} examines whether physical testing results—such as the 40-yard dash, bench press, and vertical jump—are strong indicators of future success. Their approach relies on statistical analysis of combine metrics and their correlation with NFL outcomes. The key takeaway is that while some metrics show weak relationships with performance, the overall predictive power of the combine alone is limited and inconsistent across positions. This suggests that relying heavily on physical measurables may not be sufficient for accurate player evaluation.
+
+More recent work, such as \textit{Optimizing NFL Draft Selections with Machine Learning Classification}, takes a broader machine learning approach by incorporating multiple features, including player rankings, grades, and performance-related variables. This study builds both classification and regression models to simulate draft outcomes and compares strategies such as best-player-available versus need-based drafting. One of its main contributions is extending beyond simple prediction to simulate entire drafts and evaluate decision-making strategies. The results show that machine learning can improve consistency and reduce some of the subjectivity present in traditional scouting, especially when team needs are incorporated into the model.
+
+Our approach builds on these ideas but differs in two key ways. First, instead of focusing primarily on combine metrics or draft simulation alone, we explicitly connect \textbf{predicted performance with draft position} to identify inefficiencies. Prior work generally asks whether pre-draft features predict NFL outcomes or whether machine learning can improve draft simulations. Our project instead asks whether the gap between predicted success and draft cost can identify undervalued players. Second, we emphasize \textbf{college production as a central feature}, addressing a gap where prior work either underweights performance data or treats it as one of many inputs rather than a primary signal.
+
+We measure career success using Pro Football Reference's weighted approximate value (w\_av)~\cite{pfr_av}, which aggregates a player's seasonal contributions into a single career number with greater weight on recent seasons. We chose w\_av over raw career statistics because it provides a position-independent measure of total value that accounts for playing time, production, and team success. It is widely used in football analytics research and allows direct comparison across positions and eras.
+
+By combining classification (success prediction) and regression (draft position prediction), our method creates a more direct ``value gap'' framework that highlights where teams may be over- or under-valuing prospects. Overall, while prior studies show that data-driven methods can improve player evaluation, they either focus on limited inputs (combine-only) or on draft simulation without explicitly identifying inefficiencies. This project bridges that gap by using predictive modeling to both evaluate players and measure draft value in a unified framework.
+
+% ============================================================
+%  3. DATA + METHODS
+% ============================================================
+
+\section{Data and Methods}
+
+\subsection{Data Sources}
+
+The primary dataset was obtained from the nflverse project using the \texttt{nfl\_data\_py} Python package~\cite{nflverse}. It includes NFL Combine measurements for 8,968 players (2000--2026) and draft records with career outcomes for 6,644 players (1980--2025). These were merged on player identifiers and draft season, yielding 5,302 matched records.
+
+We augmented this with college football statistics from Sports Reference~\cite{sportsref}, covering passing, receiving, and rushing performance from 1996 to 2025. College data was merged using college player identifiers. Approximately 688 players could not be matched and were excluded from models requiring college features. The analysis was restricted to players drafted in 2020 or earlier so that career outcomes had time to stabilize.
+
+\subsection{Features}
+
+Our feature set has two categories: \textbf{combine measurables} and \textbf{college production statistics}. The five combine features (height, weight, 40-yard dash, vertical jump, and broad jump) are consistent across all three positions. College features are position-specific:
+
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item \textbf{QB:} career and final-season completions, attempts, completion percentage, yards, touchdowns, interceptions, and passer rating (15 features).
+\item \textbf{WR:} career and final-season receptions, receiving yards, yards per reception, touchdowns, and yards per game (12 features).
+\item \textbf{RB:} career and final-season rushing attempts, yards, yards per attempt, touchdowns, plus receiving stats to capture pass-catching ability (20 features).
+\end{itemize}
+
+College features were selected to capture both volume and efficiency. Counting stats like career yards and touchdowns measure total production, while rate stats like yards per attempt and completion percentage measure how efficiently a player produced. We included both career totals and final-season stats because career totals reward consistency and longevity in college, while final-season stats capture a player's most recent form heading into the draft. Rate statistics were recalculated from summed counting stats rather than averaged across seasons, ensuring accuracy for players with multiple college years. Features like conference affiliation were tested during exploration but did not improve model performance due to high dimensionality and were excluded. Bench press, cone drill, and shuttle were excluded because they had the highest missing data rates (35--40\%) and would have reduced sample sizes substantially.
+
+\subsection{Outcome Definition}
+
+Career success is measured using weighted approximate value (w\_av), a Pro Football Reference metric that emphasizes peak performance over longevity. We set position-specific thresholds so that every ``hit'' is a recognizably successful NFL player:
+
+\begin{itemize}
+\setlength\itemsep{0pt}
+\item \textbf{QB:} w\_av $\geq$ 40 (75th percentile). This captures multi-year starters like Derek Carr, Jalen Hurts, and Joe Flacco while excluding career backups.
+\item \textbf{RB:} w\_av $\geq$ 28 ($\sim$80th percentile). This captures multi-year starters like Bijan Robinson, Jahmyr Gibbs, and Shaun Alexander while eliminating running backs the underperformed in the NFL.
+\item \textbf{WR:} w\_av $\geq$ 32 ($\sim$75th percentile). This captures multi-year starters like Plaxico Burress, Nico Collins, and Puka Nacua while eliminating guys that didn't pan out.
+\end{itemize}
+
+Table~\ref{tab:samples} shows the modeling sample sizes and class balance for each position after filtering to players with complete combine and college features.
+ 
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Pos & Total & Hits & Busts & Hit Rate \\
+\midrule
+QB & 166 & 36 & 130 & 21.7\% \\
+RB & 355 & 73 & 282 & 20.6\% \\
+WR & 426 & 89 & 337 & 20.9\% \\
+\bottomrule
+\end{tabular}
+\caption{Modeling sample sizes and class balance by position.}
+\label{tab:samples}
+\end{table}
+ 
+These base hit rates provide context for interpreting precision and recall. A QB precision of 67\% is over three times the base rate of 21.7\%, meaning the model concentrates hits far above chance.
+
+\subsection{Models}
+
+For each position, we train two models. The \textbf{classification model} predicts whether a player will be a hit or bust. We evaluated logistic regression, random forest, and gradient boosting. Logistic regression was not selected because it assumes a linear relationship between features and the outcome, which is unlikely to hold for complex interactions like how height, weight, and speed combine to predict success. Random forest was not selected because, despite strong accuracy, it consistently achieved near-zero hit recall at most positions, meaning it almost never predicted a player would be a hit. Gradient boosting was selected at all three positions because it provided the best balance of precision and recall. It builds an ensemble of shallow decision trees sequentially, with each tree correcting the errors of the previous ones, making it effective at learning complex, non-linear patterns in small datasets.
+
+The \textbf{regression model} predicts expected draft pick number. We evaluated ridge, lasso, random forest, and gradient boosting regressors. Out of the 4 models evaluated, Lasso was selected for QB and RB because it performs feature selection by shrinking less important coefficients to zero, which is useful when many features may be noisy. Ridge was selected for WR because it retains all features with regularization, which performed better when more features contributed signal.
+
+\subsection{Evaluation Metrics}
+
+All models were validated using 5-fold cross-validation.
+
+For classification, we report \textbf{precision} and \textbf{recall} rather than accuracy alone. In our context, precision answers: ``When the model predicts a player will be a hit, how often is it correct?'' Recall answers: ``Of all the players who actually became hits, how many did the model identify?'' Accuracy alone is misleading because hits are the minority class (20--35\% of players). A model that predicts bust for everyone would achieve 70\%+ accuracy while being completely useless for finding value picks.
+
+For regression, we report \textbf{MAE} (mean absolute error) and \textbf{R$^2$}. MAE tells us how many draft picks off the prediction is on average. An MAE of 50 means the model is typically wrong by about 1.5 rounds. R$^2$ tells us what fraction of the variance in draft position is explained by the model. An R$^2$ of 0.23 means the features explain about a quarter of why one player goes earlier than another.
+
+\subsection{Handling Class Imbalance}
+
+Because hits are rare, initial models predicted bust for every player, achieving high accuracy but zero recall. We applied class weighting to logistic regression and random forest, and tuned the prediction threshold for gradient boosting. The optimal thresholds were 0.50 for QB, 0.30 for WR, and 0.20 for RB. A higher QB threshold reflects both lower model confidence and the real-world cost of a quarterback miss, while the lower RB threshold casts a wider net at a position where draft mistakes are less expensive.
+
+All reported classification and regression metrics are computed using 5-fold cross-validation within each position group. Classification thresholds were selected using cross-validated predicted probabilities to balance precision and recall, with a preference for higher precision because the model is intended as a filtering tool. For lasso and ridge regression, all continuous features were standardized before fitting. Although random forest achieved slightly higher cross-validated accuracy than gradient boosting at most positions (Table~\ref{tab:cv}), gradient boosting was selected for the final classifier because it produced the best precision-recall tradeoff at decision thresholds useful for scouting. Accuracy alone does not capture this distinction because a model can achieve high accuracy by predicting bust for every player.
+
+% ============================================================
+%  4. EXPERIMENTS
+% ============================================================
+
+\section{Experiments}
+
+\subsection{College Stats Improve Every Model}
+
+Adding college statistics improved classification performance at every position (Table~\ref{tab:cv}). The largest gains appeared in logistic regression, where QB accuracy jumped from 0.561 to 0.701 (+14\%) and RB from 0.555 to 0.703 (+15\%). Even random forest and gradient boosting, which already performed reasonably with combine data alone, improved further with college features. This confirms that college production provides meaningful signal beyond physical measurables.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llcc}
+\toprule
+Pos & Model & Combine & +College \\
+\midrule
+QB & LogReg & 0.561 & 0.701 \\
+QB & RF & 0.742 & 0.767 \\
+QB & GB & 0.689 & 0.718 \\
+\midrule
+RB & LogReg & 0.555 & 0.703 \\
+RB & RF & 0.776 & 0.801 \\
+RB & GB & 0.734 & 0.793 \\
+\midrule
+WR & LogReg & 0.569 & 0.649 \\
+WR & RF & 0.843 & 0.840 \\
+WR & GB & 0.823 & 0.806 \\
+\bottomrule
+\end{tabular}
+\caption{Cross-validated accuracy: combine-only vs.\ combine + college stats.}
+\label{tab:cv}
+\end{table}
+
+\subsection{Hit/Bust Classification Results}
+
+Table~\ref{tab:class} shows classification performance at optimized thresholds. Gradient boosting achieved the best precision-recall balance at all positions. QB precision is highest at 67\%, meaning two out of three players the model flags as hits actually become hits. However, QB recall is lowest at 22\%, meaning the model only catches about one in five successful QBs. RB and WR show more balanced tradeoffs at their lower thresholds, identifying 35-39\% of actual hits while maintaining reasonable precision.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Pos & Thresh & Prec & Recall & CV Acc \\
+\midrule
+QB & 0.50 & 67\% & 22\% & 0.718 \\
+RB & 0.20 & 44\% & 39\% & 0.793 \\
+WR & 0.30 & 38\% & 35\% & 0.806 \\
+\bottomrule
+\end{tabular}
+\caption{Hit/bust classification at optimized thresholds.}
+\label{tab:class}
+\end{table}
+
+The low recall across all positions reflects both the genuine difficulty of predicting NFL success and a deliberate design choice. The model is conservative by nature: it favors precision over recall, meaning it would rather miss a good player than incorrectly flag a bad one as a hit. This makes it substantially better suited as a \textit{filtering tool} than a discovery tool. It does not attempt to find every player who will succeed. Instead, it surfaces a smaller set of high-confidence prospects that warrant deeper scouting attention. For a general manager, a short list where two out of three flagged players actually become hits (67\% precision for QB) is far more useful than a long list that catches every hit but is filled with false positives.
+
+\subsection{Draft Position Prediction (Regression) }
+
+Draft pick prediction reveals a striking difference across positions (Table~\ref{tab:draft}). QB draft position is essentially unpredictable from our features (R$^2$ = 0.022, MAE = 62 picks). This means that where a QB gets drafted has almost nothing to do with his college stats or combine numbers. Instead, it reflects factors like arm talent evaluation, interview performance, perceived leadership, team-specific scheme preferences, and media narratives, none of which appear in our data.
+
+RB and WR are more predictable (R$^2$ $\approx$ 0.23, MAE $\approx$ 49--52). This makes sense: these positions are evaluated more directly on measurable production (yards, touchdowns, speed), which our features capture well. For QB and RB, Lasso regression outperformed other regressors because it applies L1 regularization, which shrinks less important feature coefficients to exactly zero. With 20 features per position and relatively small sample sizes, this automatic feature selection reduces overfitting by removing noisy predictors from the model entirely. For WR, Ridge regression performed best because it applies L2 regularization, which shrinks all coefficients toward zero without eliminating any. This was more effective for wide receivers because a larger number of features contributed meaningful signal, and Ridge retained all of them while preventing any single feature from dominating the prediction.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llccc}
+\toprule
+Pos & Model & MAE & RMSE & R$^2$ \\
+\midrule
+QB & Lasso & 61.6 & 75.2 & 0.022 \\
+RB & Lasso & 49.2 & -- & 0.228 \\
+WR & Ridge & 51.7 & 63.5 & 0.228 \\
+\bottomrule
+\end{tabular}
+\caption{Draft pick prediction performance.}
+\label{tab:draft}
+\end{table}
+
+\subsection{Identifying Undervalued Players}
+
+The central output of the project combines both models to identify undervalued players. For each prospect, the classification model produces a hit probability and the regression model produces a predicted draft pick. We compute a value score:
+\[
+\text{Value} = P(\text{hit}) \times 100 + (\text{actual pick} - \text{predicted pick})
+\]
+This score is not intended to estimate true dollar value or wins added. It is a simple heuristic that combines two signals: the probability that a player becomes a successful NFL contributor and the gap between where the model expected the player to be drafted and where he was actually selected. The scaling is deliberately simple. The score is intended to rank players for further scouting review, not to produce a calibrated economic valuation. We filter to players above the position-specific hit probability threshold whose actual pick was later than predicted.
+
+It is important to clarify the operational use of this formula. In this paper, we use actual draft pick to perform a historical evaluation: identifying players who were selected later than their statistical profiles suggested. In a real draft setting, a team would replace actual pick with the current pick number or with a consensus draft-board projection. The model is therefore best understood as a filtering tool that flags players who remain available later than expected given their measurable profile.
+
+Table~\ref{tab:value} shows the top undervalued players identified by the model. These are not cherry-picked. They are the output of applying the trained models to historical data and filtering by the criteria above.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llccc}
+\toprule
+Player & Pos & Pick & P(Hit) & w\_av \\
+\midrule
+Tom Brady & QB & 199 & 0.90 & 184 \\
+Dak Prescott & QB & 135 & 0.82 & 104 \\
+Tyrod Taylor & QB & 180 & 0.94 & 50 \\
+Aaron Jones & RB & 182 & 0.93 & 67 \\
+A. Bradshaw & RB & 250 & 0.83 & 42 \\
+M. Turner & RB & 154 & 0.90 & 55 \\
+D. Waller & WR & 204 & 0.65 & 33 \\
+D.K. Metcalf & WR & 64 & 0.85 & 57 \\
+D. Adams & WR & 53 & 0.94 & 92 \\
+\bottomrule
+\end{tabular}
+\caption{Top undervalued players identified by the model.}
+\label{tab:value}
+\end{table}
+
+A general manager would use this model as a pre-draft screening tool. Rather than ranking all prospects, the model filters the pool down to a shortlist of players whose combination of projected success and expected draft availability represents the best return on investment. The GM's scouting staff then evaluates that shortlist using film, interviews, and medical reports. The model does not make the pick. It narrows the search.
+
+\subsection{Key Visualizations}
+
+Figure~\ref{fig:value_zone} shows the undervalued player identification framework. The x-axis is predicted draft pick, the y-axis is hit probability, and the green ``Value Zone'' in the upper-right highlights players with high success probability and late predicted picks. This visualization, along with the accompanying panel figures, was awarded first place in the TAMIDS Sports Data Science Competition midpoint visualization round, selected over eight other teams and earning a \$250 prize.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{viz3_undervalued_quadrant.png}
+\caption{Undervalued player identification. The Value Zone highlights prospects with high predicted success and late expected draft position.}
+\label{fig:value_zone}
+\end{figure}
+
+Figure~\ref{fig:actual_pred} shows actual vs.\ predicted draft position. QB predictions scatter widely, while RB and WR cluster closer to the diagonal, confirming that quarterback evaluation depends on factors outside our feature set.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{viz4_actual_vs_predicted.png}
+\caption{Actual vs.\ predicted draft pick. QB shows far more dispersion than RB or WR.}
+\label{fig:actual_pred}
+\end{figure}
+% ============================================================
+%  5. CONCLUSION
+% ============================================================
+
+\section{Conclusion}
+
+This project demonstrates that combining NFL Combine measurables with college production statistics meaningfully improves the prediction of professional success, with cross-validation accuracy gains of 2 to 15 percentage points depending on position and model type. The key insight is not just that college stats help, but that they help in position-specific ways: career yards per game is the strongest predictor for running backs and wide receivers, while passer rating and interception rate matter most for quarterbacks.
+
+The model reveals a clear asymmetry in draft predictability. Running backs and wide receivers are evaluated relatively consistently by NFL teams, with our features explaining about 23\% of the variance in draft position. Quarterbacks are a different story entirely. Their draft position is driven almost entirely by factors our data cannot capture, including arm talent, leadership perception, and team-specific scheme fit. In comparision our features were only able to explain around 2\% of the variance in draft position. This finding has a practical implication: data-driven models add the most value at RB and WR, where the gap between statistical signal and current team evaluation is largest.
+
+The results suggest that measurable production and combine data can identify players who were drafted later than their statistical profiles would imply, especially at RB and WR. Players like Tom Brady (pick 199, 90\% hit probability), Aaron Jones (pick 182, 93\%), and Davante Adams (pick 53, 94\%) were all flagged as undervalued, meaning their college production and physical profiles strongly predicted success but they were available later than comparable prospects. A team using this model would have had a structured, quantitative reason to target these players.
+
+The model has clear limitations. Recall remains moderate at 22--39\%, meaning it misses many successful players. It cannot capture injuries, coaching, scheme fit, or psychological traits. Transfer players have incomplete career totals. These constraints mean the model works best as a decision-support tool that narrows the prospect pool rather than replacing traditional evaluation.
+
+Future work should incorporate player grading data (e.g., PFF), cognitive testing scores (e.g., S2 Cognition), and injury history. Expanding to defensive positions would require access to consistent defensive college statistics. As recent draft classes accumulate more playing time, the model can be validated on true out-of-sample data.
+
+% ============================================================
+%  REFERENCES
+% ============================================================
+\newpage
+\begin{thebibliography}{9}
+\small
+\bibitem{kuzmits2008}
+F.~Kuzmits and A.~Adams,
+``The NFL Combine: Does It Predict Performance in the National Football League?''
+\textit{Journal of Strength and Conditioning Research}, vol.~22, no.~6, 2008.
+Available: \url{https://www.researchgate.net/publication/23305472_The_NFL_Combine_Does_It_Predict_Performance_in_the_National_Football_League}.
+\bibitem{leung2024}
+C.~Leung and A.~Joseph,
+``Optimizing NFL Draft Selections with Machine Learning Classification,''
+\textit{MDPI AI}, vol.~6, no.~9, 2024.
+Available: \url{https://www.mdpi.com/2673-2688/6/9/221}.
+\bibitem{lewis2003}
+M.~Lewis,
+\textit{Moneyball: The Art of Winning an Unfair Game}.
+W.W.~Norton, 2003.
+\bibitem{nflverse}
+nflverse,
+``nfl\_data\_py Python Package,''
+Available: \url{https://github.com/nflverse/nfl_data_py}.
+\bibitem{sportsref}
+Sports Reference LLC,
+``College Football at Sports-Reference.com,''
+Available: \url{https://www.sports-reference.com/cfb/}.
+\bibitem{pfr_av}
+Pro Football Reference,
+``Approximate Value,''
+Available: \url{https://www.pro-football-reference.com/blog/indexd961.html?page_id=8061}.
+\bibitem{repo}
+T.~Nordberg,
+``TAMIDS 2026 Project Repository,''
+Available: \url{https://github.com/tylernordberg0/TAMIDS_2026}.
+\end{thebibliography}
+
+\onecolumn
+\appendix
+\section*{Appendix: Full-Size Figures}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{viz3_undervalued_quadrant.png}
+\caption*{Figure~\ref{fig:value_zone} (enlarged): Undervalued player identification. The Value Zone highlights prospects with high predicted success and late expected draft position.}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{viz4_actual_vs_predicted.png}
+\caption*{Figure~\ref{fig:actual_pred} (enlarged): Actual vs.\ predicted draft pick. QB shows far more dispersion than RB or WR.}
+\end{figure}
+
+\end{document}
