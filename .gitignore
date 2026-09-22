@@ -1,4 +1,30 @@
+# Environments
 venv/
+.venv/
+env/
+
+# Python
 __pycache__/
-.DS_Store
+*.py[cod]
+*.egg-info/
+
+# Jupyter
 .ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Raw college statistics scraped from Sports Reference.
+# Not redistributed with this repo -- see README "Data Sources" for how to
+# regenerate them with src/scrape_college_stats.py.
+data/raw/college_stats/
+
+# Intermediate scraper output
+college_stats.csv
+scrape_progress.csv
