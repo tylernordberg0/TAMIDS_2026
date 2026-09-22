@@ -42,6 +42,12 @@ are near zero across all six drills.
 WR is the honest exception: the tree models did not improve there, and we report that
 rather than hiding it.
 
+> *One discrepancy worth naming: the QB Gradient Boosting bar in the figure above reads
+> 71.0%, while the notebook's cross-validated output for that model is 0.718. The other
+> seventeen bars match the notebooks exactly. The figure was exported during the
+> competition from a run whose code we no longer have (see [Notes and limitations](#notes-and-limitations));
+> the table above reports the notebook values, which are the ones to trust.*
+
 ### Accuracy is the wrong metric here
 
 Because roughly 75–85% of drafted players are busts by our thresholds, a model that
@@ -90,7 +96,17 @@ feature carries than about 40 times mattering for quarterbacks.
 ![Undervalued player identification](figures/viz3_undervalued_quadrant.png)
 
 Players in the top-right — high modeled hit probability, late predicted draft slot —
-are the targets. Top three per position by value score (hit probability × 100 + pick difference):
+are the targets.
+
+> **These are in-sample results — read them as a demonstration, not a validation.**
+> Both models below are refit on the full dataset and then scored on that same data, so
+> each player's own career outcome influenced the model that ranks him. What the table
+> shows is that the value-gap framing surfaces the right *kind* of player. It is not
+> evidence of out-of-sample skill, and it would be wrong to quote these as model
+> performance. The cross-validated numbers above are the honest measure: hit recall of
+> 0.22–0.39, and draft-pick CV MAE between roughly 49 and 62 picks.
+
+Top three per position by value score (hit probability × 100 + pick difference):
 
 | Position | Player | Actual pick | Predicted pick | P(hit) | Career wAV |
 |---|---|---|---|---|---|
@@ -103,12 +119,6 @@ are the targets. Top three per position by value score (hit probability × 100 +
 | WR | **Darren Waller** | 204 | 103.5 | 0.647 | 33 |
 | WR | D.K. Metcalf | 64 | 26.6 | 0.853 | 57 |
 | WR | Justin McCareins | 124 | 67.1 | 0.519 | 33 |
-
-> **Read this table as retrospective, not predictive.** These rankings come from models
-> refit on the full dataset and scored on that same data, so they demonstrate that the
-> value-gap framing surfaces the right kind of player — they are not held-out
-> performance. The cross-validated numbers in the tables above are the honest measure of
-> how well the models generalize.
 
 ---
 
@@ -158,8 +168,10 @@ are openly licensed and carry no such restriction.
 6. **Merge college stats** on `cfb_id`, taking each player's career totals and final
    college season. Players without a match were dropped.
 
-The result is **`data/processed/merged_data_with_college.csv` — 5,302 players, 92
-columns**, spanning the 2000–2025 drafts.
+The result is **`data/processed/merged_data_with_college.csv` — 5,302 players, 91
+columns**, spanning the 2000–2025 drafts. Hit/bust labels are deliberately *not* stored
+in it; each model notebook derives its own from `w_av`, so there is a single source of
+truth for the labels.
 
 ---
 
@@ -239,7 +251,7 @@ data/
   processed/
     nfl_draft_combine.csv       Combine + draft merge with career outcomes
     merged_data.csv             Intermediate merge, input to the scraper
-    merged_data_with_college.csv  Final modeling dataset (5,302 players, 92 columns)
+    merged_data_with_college.csv  Final modeling dataset (5,302 players, 91 columns)
   raw/
     school-conferences.txt      School → conference lookup
     college_stats/              Scraped college stats (gitignored — see Data)
@@ -278,6 +290,12 @@ Built for the TAMIDS 2026 Sports Data Science Competition (February–April 2026
 - **Figure code is not in the repository.** The six visualizations in `figures/` were
   produced during the competition by a notebook that was not committed. They are shipped
   as exported PNGs; the underlying metrics are all reproducible from notebooks 02–04.
+  One consequence is the single stale value in `viz1` noted above (QB Gradient Boosting
+  shown as 71.0% against the notebook's 0.718) — without the plotting code it cannot be
+  corrected at the source, so it is flagged rather than quietly edited.
+- **Labels are derived, not stored.** `merged_data_with_college.csv` intentionally ships
+  without a hit/bust column. Each model notebook derives its own labels from `w_av` using
+  its position's threshold, so the dataset cannot drift out of sync with the models.
 - **Survivorship in the labels.** Players drafted after 2020 have had less time to
   accumulate wAV, which biases them toward "bust." Notebook 01 identifies the dropoff;
   the position models do not apply a season cutoff.
