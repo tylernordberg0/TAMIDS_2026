@@ -1,0 +1,29 @@
+# Versions pinned to the environment the analysis was actually run in.
+# Python 3.13.9
+#
+#   python3 -m venv venv
+#   source venv/bin/activate
+#   pip install -r requirements.txt
+
+# Core analysis
+pandas==3.0.1
+numpy==2.4.3
+scipy==1.17.1
+scikit-learn==1.8.0
+
+# Plotting
+matplotlib==3.10.8
+seaborn==0.13.2
+
+# Data source (NFL combine + draft picks, via nflverse)
+nfl_data_py==0.3.3
+
+# College stats scraper (src/scrape_college_stats.py)
+requests==2.32.5
+beautifulsoup4==4.14.3
+
+# Notebook environment
+jupyter==1.1.1
+jupyterlab==4.5.6
+notebook==7.5.5
+ipykernel==7.2.0
